@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="csshogwarts.css" />
     <title>Hacked Hogwarts Data</title>
   </head>
   <body>
@@ -24,12 +25,14 @@
     <table id="list">
       <thead>
         <tr id="sorting">
-          <th data-action="sort" data-sort-direction="asc" data-sort="portrait">Portrait</th>
+          <th data-action="sort" data-sort-direction="asc" data-sort="prefect">Prefect 🌟</th>
+          <th data-action="sort" data-sort-direction="asc" data-sort="image">Portrait</th>
           <th data-action="sort" data-sort-direction="asc" data-sort="firstname">First Name</th>
           <th data-action="sort" data-sort-direction="asc" data-sort="middlename">Middle Name</th>
           <th data-action="sort" data-sort-direction="asc" data-sort="lastname">Last Name</th>
-          <th data-action="sort" data-sort-direction="asc" data-sort="nickname">Nickname</th>
+          <th data-action="sort" data-sort-direction="asc" data-sort="nickName">Nickname</th>
           <th data-action="sort" data-sort-direction="asc" data-sort="house">House</th>
+          <th data-action="sort" data-sort-direction="asc" data-sort="blood">Blood Status</th>
         </tr>
       </thead>
       <tbody>
@@ -39,14 +42,16 @@
 
     <template id="student">
       <tr>
-        <td data-field="image">portrait</td>
+        <td data-field="prefect" data-prefect="false"></td>
+        <td data-field="image"><img class="studentPortrait" src="" alt="" /></td>
         <td data-field="firstName">firstName</td>
         <td data-field="middleName">middleName</td>
         <td data-field="lastName">lastName</td>
-        <td data-field="nickname">nickname</td>
+        <td data-field="nickName">nickname</td>
         <td data-field="house">house</td>
       </tr>
     </template>
+
     <script src="hacked.js"></script>
   </body>
 </html>

@@ -2,15 +2,24 @@
 
 window.addEventListener("DOMContentLoaded", start);
 
+// Globals
 const url = "https://petlatkea.dk/2021/hogwarts/students.json";
 const allStudents = [];
+
+const settings = {
+  filter: "all",
+};
 
 function start() {
   console.log("ready");
   loadJSON();
 }
 
+function registerButtons() {
+  // Add event-listeners to filter and sort buttons
 
+  document.querySelectorAll("[data-action='filter']").forEach((button) => button.addEventListener("click", selectFilter));
+}
 
 function loadJSON() {
   fetch(url)
@@ -24,64 +33,112 @@ function cleanObjects(jsonData) {
   jsonData.forEach((jsonObject) => {
     // this is a protoype for students
     const Student = {
-      portrait: "",
+      image: "",
       firstName: "",
       middleName: "",
       lastName: "",
       nickName: "",
       house: "",
+      blood: "",
     };
+
     // Create new object with cleaned data - and store that in the allStudents array
     const student = Object.create(Student);
 
-    const fullname = jsonObject.fullname.trim();
+    // trim and split the fullname
+    const trimmedFullname = jsonObject.fullname.trim().split(" ");
 
-    if (fullname.split(" ").length === 1) {
-      student.firstName = fullname;
-      student.middleName = "";
-      student.lastName = "";
-    } else if (fullname.split(" ").length < 3) {
-      let firstNameTrim = fullname.substring(0, fullname.indexOf(" "));
-      student.firstName = firstNameTrim.charAt(0).toUpperCase() + firstNameTrim.substring(1).toLowerCase();
-
-      let lastNameTrim = fullname.substring(fullname.lastIndexOf(" ") + 1);
-        // if (lastNameTrim.includes("-")) {
-        //   // del i to og lav begge i uppercase
-        //   let separatedLastName = student.lastName.split("-");
-        //   console.log(separatedLastName);
-        //   student.lastName = separatedLastName[0].charAt(0).toUpperCase() + separatedLastName[0].slice(1).toLowerCase() + separatedLastName[1].charAt(0).toUpperCase() + separatedLastName[1].slice(1).toLowerCase();
-        // } else {
-      student.lastName = lastNameTrim.charAt(0).toUpperCase() + lastNameTrim.substring(1).toLowerCase();
-        // }
-    } else {
-      //   splitting the string to define first, middle and last name
-      let firstNameTrim = fullname.substring(0, fullname.indexOf(" "));
-      student.firstName = firstNameTrim.charAt(0).toUpperCase() + firstNameTrim.substring(1).toLowerCase();
-      // get last name
-      let lastNameTrim = fullname.substring(fullname.lastIndexOf(" ") + 1);
-      student.lastName = lastNameTrim.charAt(0).toUpperCase() + lastNameTrim.substring(1).toLowerCase();
-
-      // get nick name
-      if (fullname.includes(`\"`)) {
-        student.nickName = fullname.substring(fullname.indexOf(`\"`) + 1, fullname.lastIndexOf(`\"`)).trim();
-      } else {
-        // get middle name
-        let middleNameTrim = fullname.substring(fullname.indexOf(" ") + 1, fullname.lastIndexOf(" "));
-        student.middleName = middleNameTrim.charAt(0).toUpperCase() + middleNameTrim.substring(1).toLowerCase();
-      }
-    }
-
-    // get house
-    let houseTrim = jsonObject.house.trim();
-
-    student.house = houseTrim.charAt(0).toUpperCase() + houseTrim.substring(1).toLowerCase();
-
-    // console.log(Student);
+    student.firstName = cleanFirstName(trimmedFullname);
+    student.middleName = cleanMiddleName(trimmedFullname);
+    student.lastName = cleanLastName(trimmedFullname);
+    student.nickName = cleanNickname(trimmedFullname);
+    student.house = cleanHouse(jsonObject);
+    // student.image = cleanImage(trimmedFullname);
 
     allStudents.push(student);
   });
+
   displayCleanStudentList();
 }
+
+function cleanFirstName(fullname) {
+  return `${fullname[0].charAt(0).toUpperCase()}${fullname[0].slice(1).toLowerCase()}`;
+}
+
+function cleanMiddleName(fullname) {
+  if (fullname.length <= 2) {
+    return `N/a`;
+  } else {
+    if (fullname[1].includes(`"`) === true) {
+      return `N/a`;
+    } else {
+      return `${fullname[1].charAt(0).toUpperCase()}${fullname[1].slice(1).toLowerCase()}`;
+    }
+  }
+}
+
+function cleanLastName(fullname) {
+  if (fullname.length === 1) {
+    return `N/A`;
+  } else {
+    if (fullname[1].includes("-")) {
+      let hyphenName = fullname[1].split("-");
+      return `${hyphenName[0].charAt(0).toUpperCase()}${hyphenName[0].slice(1).toLowerCase()}-${hyphenName[1].charAt(0).toUpperCase()}${hyphenName[1].slice(1).toLowerCase()}`;
+    } else {
+      const lastCharacter = fullname[fullname.length - 1];
+      return `${lastCharacter.charAt(0).toUpperCase()}${lastCharacter.slice(1).toLowerCase()}`;
+    }
+  }
+}
+
+function cleanNickname(fullname) {
+  if (fullname.length === 1) {
+    return `N/a`;
+  } else if (fullname.length > 1) {
+    if (fullname[1].includes(`"`) !== true) {
+      return `N/a`;
+    } else {
+      return `${fullname[1].substring(1, 2).toUpperCase()}${fullname[1].substring(2, fullname[1].lastIndexOf('"')).toLowerCase()}`;
+    }
+  }
+}
+
+function cleanHouse(jsonObject) {
+  const trimHouseName = jsonObject.house.trim();
+  return `${trimHouseName.charAt(0).toUpperCase()}${trimHouseName.slice(1).toLowerCase()}`;
+}
+
+// function cleanImage(fullname) {
+//   // a way of getting the last character of fullname string
+//   let lastCharacter = fullname[fullname.length - 1];
+
+//   if (fullname.length === 1) {
+//     return `N/a`;
+//   } else if (fullname[1] === "Patil") {
+//     return `${lastCharacter.toLowerCase()}_${fullname[0].toLowerCase()}.png`;
+//   } else {
+//     if (fullname[1].includes("-")) {
+//       let hyphenName = lastCharacter.split("-");
+//       return `${hyphenName[hyphenName.length - 1].toLowerCase()}_${fullname[0].charAt(0).toLowerCase()}.png`;
+//     } else {
+//       return `${lastCharacter.toLowerCase()}_${fullname[0].charAt(0).toLowerCase()}.png`;
+//     }
+//   }
+// }
+
+function selectFilter(event) {
+  const filter = event.target.dataset.filter;
+
+  console.log(`User selected ${filter}`);
+
+  setFilter(filter);
+}
+
+function setFilter(filter) {
+  settings.filterBy = filter;
+  buildList();
+}
+
 function displayCleanStudentList() {
   // clears the list
   document.querySelector("#list tbody").innerHTML = "";
@@ -90,18 +147,28 @@ function displayCleanStudentList() {
   allStudents.forEach(displayStudent);
 }
 
+function buildList(){
+  const currentList = filterList(allStudents);
+  
+}
+
 function displayStudent(student) {
   // create clone
   const clone = document.querySelector("template#student").content.cloneNode(true);
+
+  // clone image
+  // clone.querySelector("#studentPortrait").src = `images/${student.image}`;
 
   // set clone data
   clone.querySelector("[data-field=firstName]").textContent = student.firstName;
   clone.querySelector("[data-field=middleName]").textContent = student.middleName;
   clone.querySelector("[data-field=lastName]").textContent = student.lastName;
-  clone.querySelector("[data-field=nickname]").textContent = student.nickname;
+  clone.querySelector("[data-field=nickName]").textContent = student.nickName;
   clone.querySelector("[data-field=house]").textContent = student.house;
+  // clone.querySelector("[data-field=blood]").textContent = student.blood;
 
   // append clone to list
   document.querySelector("#list tbody").appendChild(clone);
 }
+
 console.log(allStudents);

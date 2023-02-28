@@ -1,0 +1,6 @@
+td[data-field="prefect"]::after {
+  content: "🌟";
+}
+td[data-field="prefect"][data-prefect="false"]::after {
+  filter: grayscale(1);
+}
