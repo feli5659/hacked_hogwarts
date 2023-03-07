@@ -5,53 +5,104 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="csshogwarts.css" />
-    <title>Hacked Hogwarts Data</title>
+    <title>Felicia Hacks Hogwarts</title>
   </head>
   <body>
-    <h1>Hacked Hogwarts Student List</h1>
     <header>
-      <nav>
-        Filter:
-        <button class="filter valgt" data-action="filter" data-filter="*">All</button>
-        <button class="filter" data-action="filter" data-filter="gryffindor">Gryffindor</button>
-        <button class="filter" data-action="filter" data-filter="slytherin">Slytherin</button>
-        <button class="filter" data-action="filter" data-filter="ravenclaw">Ravenclaw</button>
-        <button class="filter" data-action="filter" data-filter="hufflepuff">Hufflepuff</button>
-
-        <!-- data attribut gør filtrering af indhold muligt -->
-      </nav>
+      <h1>Hogwarts Student List</h1>
+      <!-- <img class="logo" src="house_crests/hogwarts_logo.svg" alt="hogwarts logo" /> -->
     </header>
+    <main>
+      <nav class="nav-filter">
+        <h3>Filter by:</h3>
+        <select name="filter" id="filter">
+          <option value="all" class="filter" data-filter_type="all" selected>Show all</option>
+          <option value="Gryffindor" class="filter" data-filter_type="house">Gryffindor</option>
+          <option value="Slytherin" class="filter" data-filter_type="house">Slytherin</option>
+          <option value="Hufflepuff" class="filter" data-filter_type="house">Hufflepuff</option>
+          <option value="Ravenclaw" class="filter" data-filter_type="house">Ravenclaw</option>
+          <option value="prefect" class="filter" data-filter_type="prefect" data-filter="true">Prefects</option>
+          <option value="expelled" class="filter" data-filter_type="expelled" data-filter="true">Expelled students</option>
+          <option value="inqSquad" class="filter" data-filter_type="inqSquad" data-filter="true">Inquisitorial squad</option>
+          <option value="Boy" class="filter" data-filter_type="gender">Boys</option>
+          <option value="Girl" class="filter" data-filter_type="gender">Girls</option>
+          <option value="pure" class="filter" data-filter_type="blood">Pure blood</option>
+          <option value="half" class="filter" data-filter_type="blood">Half blood</option>
+          <option value="muggle" class="filter" data-filter_type="blood">Muggles</option>
+        </select>
+      </nav>
+      <nav class="nav_sorting">
+        <h3>Sort by:</h3>
+        <select name="sort" id="sort">
+          <option class="sort" data-action="sort" data-sort-direction="asc" data-sort="all">All</option>
+          <option class="sort" data-action="sort" data-sort-direction="asc" data-sort="studentId">Student id</option>
+          <option class="sort" data-action="sort" data-sort-direction="asc" data-sort="firstName">Firstname</option>
+          <option class="sort" data-action="sort" data-sort-direction="asc" data-sort="lastName">Lastname</option>
+          <option class="sort" data-action="sort" data-sort-direction="asc" data-sort="house">House</option>
+          <option class="sort" data-action="sort" data-sort-direction="asc" data-sort="prefect">Prefect</option>
+          <option class="sort" data-action="sort" data-sort-direction="asc" data-sort="inqSquad">Inq. Squad</option>
+        </select>
+        <div class="sortby" data-action="sort" data-sort-direction="asc" data-sort="direction"></div>
+      </nav>
+      <nav class="nav_search">
+        <div class="search_wrapper">
+          <h3>Search:</h3>
+          <input type="text" name="searchbar" id="searchbar" placeholder="Search here..." />
+        </div>
+      </nav>
+      <section id="student_list"></section>
+    </main>
 
-    <table id="list">
-      <thead>
-        <tr id="sorting">
-          <th data-action="sort" data-sort-direction="asc" data-sort="prefect">Prefect 🌟</th>
-          <th data-action="sort" data-sort-direction="asc" data-sort="image">Portrait</th>
-          <th data-action="sort" data-sort-direction="asc" data-sort="firstname">First Name</th>
-          <th data-action="sort" data-sort-direction="asc" data-sort="middlename">Middle Name</th>
-          <th data-action="sort" data-sort-direction="asc" data-sort="lastname">Last Name</th>
-          <th data-action="sort" data-sort-direction="asc" data-sort="nickName">Nickname</th>
-          <th data-action="sort" data-sort-direction="asc" data-sort="house">House</th>
-          <th data-action="sort" data-sort-direction="asc" data-sort="blood">Blood Status</th>
-        </tr>
-      </thead>
-      <tbody>
-        <!-- student template will be copied and inserted here -->
-      </tbody>
-    </table>
-
+    <!-- Template for student -->
     <template id="student">
-      <tr>
-        <td data-field="prefect" data-prefect="false"></td>
-        <td data-field="image"><img class="studentPortrait" src="" alt="" /></td>
-        <td data-field="firstName">firstName</td>
-        <td data-field="middleName">middleName</td>
-        <td data-field="lastName">lastName</td>
-        <td data-field="nickName">nickname</td>
-        <td data-field="house">house</td>
-      </tr>
+      <article class="student_container">
+        <img data field="student_img" src="pictures/potter_h.png" alt="" />
+        <div class="info">
+          <h4>Full Name: <span class="fullname" data-field="fullname"></span></h4>
+          <h4>House: <span class="house" data-field="house"></span></h4>
+          <p class="student_id"></p>
+          <div class="show_more_and_badges"><button class="show_more" data-field="show_more">More info</button></div>
+          <div class="badges">
+            <img src="house_crests/Gryffindor.svg" alt="crests" data-badges="crest" />
+            <img src="house_crests/prefect.svg" alt="prefect" data-field="prefect" data-prefect="false" />
+            <img src="house_crests/pngwing.com.png" alt="inqSquad" data-field="inq-squad" data-inq-squad="false" />
+          </div>
+        </div>
+      </article>
     </template>
 
+    <!-- Pop up for more info -->
+    <div id="pop_up">
+      <section class="content">
+        <article class="student_img_pop">
+          <img src="" alt="" class="student_img" />
+        </article>
+        <article class="info_wrapper">
+          <div id="info1">
+            <h3><span id="fullname"></span></h3>
+            <p>Firstname: <span id="firstname"></span></p>
+            <p>Middlename: <span id="middlename"></span></p>
+            <p>Lastname: <span id="lastname"></span></p>
+            <p>Nickname: <span id="nickname"></span></p>
+            <p>House: <span id="house"></span></p>
+            <p>Blood History: <span class="blood"></span></p>
+          </div>
+          <div id="info2">
+            <button class="close">&times;</button>
+          </div>
+        </article>
+        <div class="badges">
+          <img src="house_crests/Gryffindor.svg" alt="crests" data-badges="crest" />
+          <img src="house_crests/prefect.svg" alt="prefect" data-field="prefect" data-prefect="false" />
+          <img src="house_crests/pngwing.com.png" alt="inqSquad" data-field="inq-squad" data-inq-squad="false" />
+        </div>
+        <div class="badges_btn">
+          <button id="prefect_btn" data-prefect="false">Prefect</button>
+          <button id="squad_btn" data-inq-squad="false">Inq. squad</button>
+          <button id="expel_btn" data-expel="false">Expel</button>
+        </div>
+      </section>
+    </div>
     <script src="hacked.js"></script>
   </body>
 </html>

@@ -2,173 +2,152 @@
 
 window.addEventListener("DOMContentLoaded", start);
 
-// Globals
-const url = "https://petlatkea.dk/2021/hogwarts/students.json";
-const allStudents = [];
+// Global variables
+const urlList = "https://petlatkea.dk/2021/hogwarts/students.json";
+const urlBlood = "https://petlatkea.dk/2021/hogwarts/families.json";
 
+let allStudents = [];
+let expelledList = [];
+let bloodHistory = [];
+
+// Object for filter, sort and search
 const settings = {
-  filter: "all",
+  filterBy: "all",
+  filterType: "all",
+  sortBy: "studentId",
+  sortDir: "asc",
+  search: "",
 };
 
-function start() {
-  console.log("ready");
-  loadJSON();
+// start function
+
+async function start() {
+  console.log("start function running");
+  const studentList = await getData(urlList);
+  // const bloodList = await getData(urlBlood);
+
+  allStudents = studentList.map(cleanUpData);
+  //  buildList();
+  //  regBtn();
 }
 
-function registerButtons() {
-  // Add event-listeners to filter and sort buttons
-
-  document.querySelectorAll("[data-action='filter']").forEach((button) => button.addEventListener("click", selectFilter));
+async function getData(url) {
+  const response = await fetch(url);
+  const jsonData = await response.json();
+  return jsonData;
 }
 
-function loadJSON() {
-  fetch(url)
-    .then((response) => response.json())
-    .then((jsonData) => {
-      cleanObjects(jsonData);
-    });
-}
+function cleanUpData(studentList, i) {
+  // student object
+  const Student = {
+    studentId: null,
+    firstName: "",
+    lastName: "",
+    middleName: "",
+    nickName: "",
+    gender: "",
+    imgSrc: "",
+    house: "",
+    blood: "",
+    prefect: false,
+    expelled: false,
+    inqSquad: false,
+  };
 
-function cleanObjects(jsonData) {
-  jsonData.forEach((jsonObject) => {
-    // this is a protoype for students
-    const Student = {
-      image: "",
-      firstName: "",
-      middleName: "",
-      lastName: "",
-      nickName: "",
-      house: "",
-      blood: "",
-    };
+  const student = Object.create(Student);
 
-    // Create new object with cleaned data - and store that in the allStudents array
-    const student = Object.create(Student);
+  // Variable holding data + trim spaces
+  let house = studentList.house.trim();
+  let gender = studentList.gender.trim();
+  let fullName = studentList.fullname.trim();
 
-    // trim and split the fullname
-    const trimmedFullname = jsonObject.fullname.trim().split(" ");
+  // set student Id number
+  student.studentId = i + 1;
 
-    student.firstName = cleanFirstName(trimmedFullname);
-    student.middleName = cleanMiddleName(trimmedFullname);
-    student.lastName = cleanLastName(trimmedFullname);
-    student.nickName = cleanNickname(trimmedFullname);
-    student.house = cleanHouse(jsonObject);
-    // student.image = cleanImage(trimmedFullname);
-
-    allStudents.push(student);
-  });
-
-  displayCleanStudentList();
-}
-
-function cleanFirstName(fullname) {
-  return `${fullname[0].charAt(0).toUpperCase()}${fullname[0].slice(1).toLowerCase()}`;
-}
-
-function cleanMiddleName(fullname) {
-  if (fullname.length <= 2) {
-    return `N/a`;
+  // Firstname, first char toUpperCase, rest toLowerCase
+  if (fullName.includes(" ")) {
+    student.firstName = fullName.substring(0, 1).toUpperCase() + fullName.substring(1, fullName.indexOf(" ")).toLowerCase();
   } else {
-    if (fullname[1].includes(`"`) === true) {
-      return `N/a`;
-    } else {
-      return `${fullname[1].charAt(0).toUpperCase()}${fullname[1].slice(1).toLowerCase()}`;
-    }
+    student.firstName = fullName.substring(0, 1).toUpperCase() + fullName.substring(1).toLowerCase();
   }
-}
 
-function cleanLastName(fullname) {
-  if (fullname.length === 1) {
-    return `N/A`;
+  // Lastname, first char toUpperCase, rest toLowerCase
+  if (fullName.includes(" ")) {
+    student.lastName = fullName.substring(fullName.lastIndexOf(" ") + 1, fullName.lastIndexOf(" ") + 2).toUpperCase() + fullName.substring(fullName.lastIndexOf(" ") + 2).toLowerCase();
+  }
+
+  // Middlename, first char toUpperCase, rest toLowerCase
+  student.middleName = fullName.substring(fullName.indexOf(" ") + 1, fullName.lastIndexOf(" "));
+  student.middleName = student.middleName.substring(0, 1).toUpperCase() + student.middleName.substring(1).toLowerCase();
+
+  // find nickname with ""
+  if (fullName.includes(`"`)) {
+    student.middleName = "";
+    student.nickName = fullName.substring(fullName.indexOf(`"`), fullName.lastIndexOf(`"`) + 1);
+  }
+
+  // Gender, first char toUpperCase, rest toLowerCase
+  student.gender = gender.charAt(0).toUpperCase() + gender.substring(1).toLowerCase();
+
+  // find img destination and lowercase all
+  let imgSrcHolder;
+  if (fullName.includes("-")) {
+    imgSrcHolder = `./pictures/${fullName.substring(fullName.lastIndexOf("-") + 1).toLowerCase()}_${student.firstName.charAt(0).toLowerCase()}.png`;
+  } else if (!fullName.includes(" ")) {
+    imgSrcHolder = `./pictures/no_picture.png`;
+  } else if (fullName.toLowerCase().includes("patil")) {
+    if (fullName.toLowerCase().includes("padma")) {
+      imgSrcHolder = "./pictures/patil_padma.png";
+    } else if (fullName.toLowerCase().includes("parvati")) imgSrcHolder = "./assets/images/students_img/patil_parvati.png";
   } else {
-    if (fullname[1].includes("-")) {
-      let hyphenName = fullname[1].split("-");
-      return `${hyphenName[0].charAt(0).toUpperCase()}${hyphenName[0].slice(1).toLowerCase()}-${hyphenName[1].charAt(0).toUpperCase()}${hyphenName[1].slice(1).toLowerCase()}`;
-    } else {
-      const lastCharacter = fullname[fullname.length - 1];
-      return `${lastCharacter.charAt(0).toUpperCase()}${lastCharacter.slice(1).toLowerCase()}`;
-    }
+    imgSrcHolder = `./pictures/${fullName.substring(fullName.lastIndexOf(" ") + 1).toLowerCase()}_${student.firstName.charAt(0).toLowerCase()}.png`;
   }
+  student.imgSrc = imgSrcHolder;
+
+  student.house = house.charAt(0).toUpperCase() + house.substring(1).toLowerCase();
+
+  student.gender = gender.charAt(0).toUpperCase() + gender.substring(1).toLowerCase();
+  // console.log(student);
+  return student;
 }
 
-function cleanNickname(fullname) {
-  if (fullname.length === 1) {
-    return `N/a`;
-  } else if (fullname.length > 1) {
-    if (fullname[1].includes(`"`) !== true) {
-      return `N/a`;
-    } else {
-      return `${fullname[1].substring(1, 2).toUpperCase()}${fullname[1].substring(2, fullname[1].lastIndexOf('"')).toLowerCase()}`;
-    }
-  }
-}
+function displayList(students) {
+  // clear the list
+  document.querySelector("#student_list").innerHTML = "";
 
-function cleanHouse(jsonObject) {
-  const trimHouseName = jsonObject.house.trim();
-  return `${trimHouseName.charAt(0).toUpperCase()}${trimHouseName.slice(1).toLowerCase()}`;
-}
+  // // count students
+  // const studentCounted = studentCounter(students);
+  // displayCount(studentCounted);
 
-// function cleanImage(fullname) {
-//   // a way of getting the last character of fullname string
-//   let lastCharacter = fullname[fullname.length - 1];
-
-//   if (fullname.length === 1) {
-//     return `N/a`;
-//   } else if (fullname[1] === "Patil") {
-//     return `${lastCharacter.toLowerCase()}_${fullname[0].toLowerCase()}.png`;
-//   } else {
-//     if (fullname[1].includes("-")) {
-//       let hyphenName = lastCharacter.split("-");
-//       return `${hyphenName[hyphenName.length - 1].toLowerCase()}_${fullname[0].charAt(0).toLowerCase()}.png`;
-//     } else {
-//       return `${lastCharacter.toLowerCase()}_${fullname[0].charAt(0).toLowerCase()}.png`;
-//     }
-//   }
-// }
-
-function selectFilter(event) {
-  const filter = event.target.dataset.filter;
-
-  console.log(`User selected ${filter}`);
-
-  setFilter(filter);
-}
-
-function setFilter(filter) {
-  settings.filterBy = filter;
-  buildList();
-}
-
-function displayCleanStudentList() {
-  // clears the list
-  document.querySelector("#list tbody").innerHTML = "";
-
-  // build a new list
-  allStudents.forEach(displayStudent);
-}
-
-function buildList(){
-  const currentList = filterList(allStudents);
-  
+  // build new list
+  students.forEach(displayStudent);
 }
 
 function displayStudent(student) {
-  // create clone
   const clone = document.querySelector("template#student").content.cloneNode(true);
 
-  // clone image
-  // clone.querySelector("#studentPortrait").src = `images/${student.image}`;
-
-  // set clone data
-  clone.querySelector("[data-field=firstName]").textContent = student.firstName;
-  clone.querySelector("[data-field=middleName]").textContent = student.middleName;
-  clone.querySelector("[data-field=lastName]").textContent = student.lastName;
-  clone.querySelector("[data-field=nickName]").textContent = student.nickName;
+  clone.querySelector("[data-field=fullname]").textContent = `${student.firstName} ${student.nickName} ${student.middleName} ${student.lastName}`;
   clone.querySelector("[data-field=house]").textContent = student.house;
-  // clone.querySelector("[data-field=blood]").textContent = student.blood;
+  clone.querySelector("[data-field=student_img]").src = student.imgSrc;
+  clone.querySelector("[data-field=student_img]").alt = `Picture of ${student.firstName} ${student.lastName}`;
+  clone.querySelector(".student_id").textContent = `Id: ${student.studentId}`;
 
-  // append clone to list
-  document.querySelector("#list tbody").appendChild(clone);
+  //  House color and crests
+  const studCont = clone.querySelector(".student_container");
+  const badgesCrest = clone.querySelector(`[data-field=crest]`);
+  if (student.house === "Gryffindor") {
+    studCont.style.borderColor = "#9c1203";
+    badgesCrest.src = "house_crests/gryffindor.png";
+  } else if (student.house === "Slytherin") {
+    studCont.style.borderColor = "#033807";
+    badgesCrest.src = "house_crests/slytherin.png";
+  } else if (student.house === "Hufflepuff") {
+    studCont.style.borderColor = "#e3a000";
+    badgesCrest.src = "house_crests/hufflepuff.png";
+  } else if (student.house === "Ravenclaw") {
+    studCont.style.borderColor = "#00165e";
+    badgesCrest.src = "house_crests/ravenclaw.png";
+  }
+  //append
+  document.querySelector("#student_list").appendChild(clone);
 }
-
-console.log(allStudents);

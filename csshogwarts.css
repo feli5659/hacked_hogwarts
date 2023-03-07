@@ -1,6 +1,15 @@
-td[data-field="prefect"]::after {
-  content: "🌟";
+h1 {
+  text-align: center;
 }
-td[data-field="prefect"][data-prefect="false"]::after {
-  filter: grayscale(1);
+main {
+  display: flex;
+  justify-content: center;
+  gap: 5rem;
 }
+
+nav {
+  display: flex;
+  gap: 20px;
+}
+
+
